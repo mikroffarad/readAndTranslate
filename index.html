@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Перекладач виділеного тексту</title>
+    <title>Завантаження HTML</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -40,33 +40,16 @@
 </head>
 <body>
 
-    <h2>Введіть текст:</h2>
+    <h2>Введіть або завантажте HTML:</h2>
 
     <div class="settings">
-        <label>Мова оригіналу:</label>
-        <select id="sourceLang">
-            <option value="en">Англійська</option>
-            <option value="uk" selected>Українська</option>
-            <option value="ru">Російська</option>
-        </select>
-
-        <label>Мова перекладу:</label>
-        <select id="targetLang">
-            <option value="en">Англійська</option>
-            <option value="uk">Українська</option>
-            <option value="ru" selected>Російська</option>
-        </select>
+        <input type="file" id="fileInput" accept=".html">
     </div>
 
     <textarea id="textInput"></textarea>
-    <div id="formattedText"></div>
     <button id="toggleButton" onclick="toggleText()">Read text</button>
 
-    
-
-    <div id="translationBlock">
-        <strong>Переклад:</strong> <span id="translatedText">Виділіть текст для перекладу</span>
-    </div>
+    <div id="formattedText"></div>
 
     <script>
         function toggleText() {
@@ -75,12 +58,12 @@
             let button = document.getElementById("toggleButton");
 
             if (textInput.style.display === "none") {
-                // Перехід до редагування
+                // Повернення в режим редагування
                 textInput.style.display = "block";
                 formattedText.style.display = "none";
                 button.textContent = "Read text";
             } else {
-                // Відображення форматованого тексту
+                // Відображення форматованого HTML
                 formattedText.innerHTML = textInput.value;
                 textInput.style.display = "none";
                 formattedText.style.display = "block";
@@ -88,26 +71,16 @@
             }
         }
 
-        document.addEventListener("selectionchange", async function() {
-            let selectedText = window.getSelection().toString().trim();
-            if (selectedText.length > 0) {
-                let sourceLang = document.getElementById("sourceLang").value;
-                let targetLang = document.getElementById("targetLang").value;
-                let translatedText = await translateText(selectedText, sourceLang, targetLang);
-                document.getElementById("translatedText").textContent = translatedText;
+        document.getElementById("fileInput").addEventListener("change", function(event) {
+            let file = event.target.files[0];
+            if (file) {
+                let reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById("textInput").value = e.target.result;
+                };
+                reader.readAsText(file);
             }
         });
-
-        async function translateText(text, sourceLang, targetLang) {
-            let url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${sourceLang}|${targetLang}`;
-            try {
-                let response = await fetch(url);
-                let data = await response.json();
-                return data.responseData.translatedText;
-            } catch (error) {
-                return "Помилка перекладу";
-            }
-        }
     </script>
 
 </body>
